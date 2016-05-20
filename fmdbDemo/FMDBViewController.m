@@ -144,6 +144,10 @@
     
     if ([db open]) {
         
+//        NSString *deleteSql = [NSString stringWithFormat:
+//                               @"delete from %@ where %@ = '%@'",
+//                               TABLENAME, NAME, @"张三"];
+        
         NSString *deleteSql = [NSString stringWithFormat:
                                @"delete from %@ where %@ = '%@'",
                                TABLENAME, NAME, @"张三"];
@@ -227,6 +231,91 @@
     });
 
 }
+
+/**
+ *  判断是否存在表
+ *
+ *  @param tableName 表名
+ *
+ *  @return
+ */
+- (BOOL)isTableOK:(NSString *)tableName
+{
+    FMResultSet *rs = [db executeQuery:@"SELECT count(*) as 'count' FROM sqlite_master WHERE type ='table' and name = ?", tableName];
+    while ([rs next])
+    {
+        // just print out what we've got in a number of formats.
+        NSInteger count = [rs intForColumn:@"count"];
+        
+        if (0 == count)
+        {
+            return NO;
+        }
+        else
+        {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
+/**
+ *  获得表的数据条数
+ *
+ *  @param tableName 表名
+ *
+ *  @return 数量
+ */
+- (BOOL) getTableItemCount:(NSString *)tableName
+{
+    NSString *sqlstr = [NSString stringWithFormat:@"SELECT count(*) as 'count' FROM %@", tableName];
+    FMResultSet *rs = [db executeQuery:sqlstr];
+    while ([rs next])
+    {
+        // just print out what we've got in a number of formats.
+        NSInteger count = [rs intForColumn:@"count"];
+        
+        return count;
+    }
+    
+    return 0;
+}
+/**
+ *  删除表
+ *
+ *  @param tableName 表名
+ *
+ *  @return 是否删除
+ */
+- (BOOL) deleteTable:(NSString *)tableName
+{
+    NSString *sqlstr = [NSString stringWithFormat:@"DROP TABLE %@", tableName];
+    if (![db executeUpdate:sqlstr])
+    {
+        return NO;
+    }
+    
+    return YES;
+}
+/**
+ *  清除表
+ *
+ *  @param tableName 表名
+ *
+ *  @return 是否清除成功
+ */
+- (BOOL) eraseTable:(NSString *)tableName
+{
+    NSString *sqlstr = [NSString stringWithFormat:@"DELETE FROM %@", tableName];
+    if (![db executeUpdate:sqlstr])
+    {
+        return NO;
+    }
+    
+    return YES;
+}
+
 
 - (void)viewDidLoad
 {
